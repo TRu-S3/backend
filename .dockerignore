@@ -45,8 +45,29 @@ docker-compose*
 # Git
 .git
 .gitignore
+
+# Documentation
 README.md
+CLOUD_SQL_SETUP.md
+*.md
+
+# Scripts (not needed in container)
+*.sh
 
 # Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Environment files
+.env*
+
+# Cloud SQL Auth Proxy binary
+cloud-sql-proxy*
+
+# Development files
+test-upload.txt
+upload-test.*
 tmp/
 temp/

@@ -2,11 +2,29 @@
 
 ## 🎯 概要
 
+### 主な特徴
+
+- **🏗️ オニオンアーキテクチャ**: 保守性・テスタビリティを重視した設計
+- **☁️ GCP完全対応**: Cloud Storage + Cloud SQL + Cloud Run
+- **🔐 セキュア**: Cloud SQL Auth Proxy による安全なDB接続
+- **🐳 Docker対応**: ローカル開発から本番デプロイまで統一環境
+- **🚀 自動化**: ワンコマンドセットアップ・デプロイ
+- **🛠️ 開発者体験**: 包括的なドキュメント・トラブルシューティング
+
+### 技術スタック
+
+- **言語**: Go 1.24.2
+- **フレームワーク**: Gin (HTTP)、GORM (ORM)
+- **データベース**: PostgreSQL 17 (Cloud SQL)
+- **ストレージ**: Google Cloud Storage
+- **インフラ**: Docker、Cloud Run、Cloud Build
+- **認証**: GCP IAM、Cloud SQL Auth Proxy
+
+### 対象ファイル
+
 - **バケット**: `202506-zenn-ai-agent-hackathon`
 - **フォルダ**: `test`
-- **アーキテクチャ**: オニオンアーキテクチャ
-- **API**: RESTful API
-- **認証**: GCP認証
+- **操作**: アップロード、ダウンロード、一覧、更新、削除
 
 ## 🏗️ アーキテクチャ
 
@@ -32,21 +50,73 @@ internal/
 
 ## 🚀 セットアップ
 
-### 1. リポジトリのクローン
+### 🛠️ 利用可能なコマンド
 
 ```bash
-git clone <repository-url>
-cd TRu-S3
+# ヘルプ表示（全コマンド確認）
+make help
+
+# 基本的なセットアップと起動
+make build                     # Dockerイメージビルド
+make run                       # Docker環境で起動
+make dev                       # 開発モード（ログ表示）
+
+# ローカル開発
+make local-run                 # ローカル環境で起動
+
+# Cloud SQL使用
+make cloudsql-setup-complete   # Cloud SQL完全自動セットアップ
+make cloudsql-troubleshoot     # トラブルシューティング
+make local-cloudsql           # Cloud SQL使用でローカル起動
+
+# Cloud Run本番環境
+make cloudrun-deploy          # Cloud Runにデプロイ
+
+# テスト
+make test                     # 基本APIテスト
+make test-all                 # 包括的APIテスト
 ```
 
-### 2. 環境変数の設定
+### 1. 基本セットアップ（Docker使用）
 
 ```bash
-# .env.example から .env をコピー
-cp .env.example .env
+# リポジトリのクローン
+git clone <repository-url>
+cd TRu-S3
 
-# .env ファイルを編集
-vim .env
+# 環境変数の設定
+cp .env.example .env
+# .env ファイルを編集してGCP設定を入力
+
+# アプリケーションの起動
+make build
+make run
+
+# 動作確認
+curl http://localhost:8080/health
+```
+
+### 2. Cloud SQL使用（推奨）
+
+```bash
+# 完全自動セットアップ（推奨）
+make cloudsql-setup-complete
+
+# または段階的セットアップ
+make cloudsql-info              # Cloud SQL情報確認
+make cloudsql-setup             # Cloud SQL Auth Proxyセットアップ
+# パスワード設定とSSL調整
+make local-cloudsql             # アプリケーション起動
+```
+
+### 3. 本番環境デプロイ
+
+```bash
+# Cloud Runへのデプロイ
+make cloudrun-deploy
+
+# 手動ビルド・デプロイ
+make cloudrun-build
 ```
 
 `.env` ファイルの内容例：
@@ -299,6 +369,97 @@ go run main.go
 PORT=8081 go run main.go
 ```
 
+## ☁️ Cloud SQL Auth Proxy
+
+本番環境では既存のCloud SQL PostgreSQLインスタンス（プロジェクト: `zenn-ai-agent-hackathon-460205`, インスタンス: `prd-db`）を使用してCloud SQL Auth Proxyで接続します。
+
+> 📖 **詳細なセットアップ手順は [CLOUD_SQL_SETUP.md](./CLOUD_SQL_SETUP.md) を参照してください**
+
+### クイックセットアップ
+
+```bash
+# 1. Cloud SQLインスタンス情報の確認
+make cloudsql-info
+
+# 2. 完全自動セットアップ（推奨）
+make cloudsql-setup-complete
+
+# 3. テスト
+curl http://localhost:8080/health
+curl http://localhost:8080/api/v1/files
+```
+
+### 手動セットアップ
+
+```bash
+# 1. Cloud SQLインスタンス情報の確認
+./check-cloudsql.sh
+
+# 2. Cloud SQL Auth Proxyのセットアップ
+./setup-cloudsql-proxy.sh
+
+# 3. パスワードの設定
+gcloud sql users set-password postgres --instance=prd-db --password="your-password" --project=zenn-ai-agent-hackathon-460205
+sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=\"your-password\"/" .env.local
+
+# 4. SSL設定の調整
+sed -i "s/^DB_SSL_MODE=.*/DB_SSL_MODE=disable/" .env.local
+
+# 5. 起動
+source .env.local
+./cloud-sql-proxy $CLOUD_SQL_CONNECTION_NAME --port=5433 &
+go run main.go &
+
+# 6. テスト
+curl http://localhost:8080/health
+curl http://localhost:8080/api/v1/files
+```
+
+### 3. Cloud SQL Auth Proxy用Docker Compose
+
+```bash
+# 接続名は既にデフォルト設定済み（prd-db）
+export CLOUD_SQL_CONNECTION_NAME="zenn-ai-agent-hackathon-460205:asia-northeast1:prd-db"
+
+# Cloud SQL Auth Proxy用のDocker Compose設定
+cp .env.example .env.cloudsql
+# .env.cloudsqlを編集してCloud SQL設定を入力
+
+# Cloud SQL Auth Proxy付きで起動
+make cloudsql-compose
+```
+
+### 4. Cloud Runへのデプロイ
+
+```bash
+# 1. 接続名は既にデフォルト設定済み（prd-db）
+export CLOUD_SQL_CONNECTION_NAME="zenn-ai-agent-hackathon-460205:asia-northeast1:prd-db"
+
+# 2. Secret Managerにパスワードを保存
+echo -n "your-cloud-sql-password" | gcloud secrets create tru-s3-db-password --data-file=-
+
+# 3. Cloud Runにデプロイ
+make cloudrun-deploy
+```
+
+### 本番環境の設定
+
+Cloud Run環境では以下の環境変数が自動設定されます：
+
+- `USE_CLOUD_SQL_PROXY=true`
+- `CLOUD_SQL_CONNECTION_NAME`: Cloud SQLインスタンスの接続名
+- `DB_PASSWORD`: Secret Managerから自動取得
+
+### 接続確認
+
+```bash
+# ヘルスチェック
+curl https://your-service-url/health
+
+# ファイル一覧取得
+curl https://your-service-url/api/v1/files
+```
+
 ## 📡 API エンドポイント一覧
 
 | エンドポイント | メソッド | 説明 |
@@ -315,35 +476,57 @@ PORT=8081 go run main.go
 ## 📁 プロジェクト構造
 
 ```
-.
-├── main.go                    # エントリーポイント
-├── .env                       # 環境変数設定 (作成が必要)
-├── .env.example               # 環境変数テンプレート
-├── internal/
-│   ├── config/
-│   │   └── config.go         # 設定管理
-│   ├── domain/
-│   │   ├── file.go           # ファイルエンティティ
-│   │   └── repository.go     # リポジトリインターフェース
-│   ├── application/
-│   │   └── file_service.go   # ファイルサービス
-│   ├── infrastructure/
-│   │   ├── gcs_client.go     # GCSクライアント
-│   │   └── gcs_file_repository.go # GCS実装
-│   └── interfaces/
-│       ├── file_handler.go   # HTTPハンドラー
-│       └── routes.go         # ルート設定
-├── go.mod
-├── go.sum
-├── Dockerfile
-├── docker-compose.yml
-├── API_DOCS.md               # 詳細API仕様
-└── README.md
+TRu-S3/
+├── 📖 ドキュメント
+│   ├── README.md                    # メインドキュメント
+│   └── CLOUD_SQL_SETUP.md          # Cloud SQL詳細ガイド
+├── 🐳 Docker設定
+│   ├── Dockerfile                   # メインDockerfile（Cloud Run対応）
+│   ├── docker-compose.yml          # ローカル開発用
+│   ├── docker-compose.cloudsql.yml # Cloud SQL用
+│   └── .dockerignore               # Docker除外設定
+├── ☁️ Cloud設定
+│   ├── cloudbuild.yaml             # Cloud Build設定
+│   └── deploy-cloudrun.sh          # Cloud Runデプロイ
+├── 🔧 セットアップスクリプト
+│   ├── setup-cloud-sql-complete.sh # 完全自動セットアップ
+│   ├── setup-cloudsql-proxy.sh     # Cloud SQL Proxyセットアップ
+│   ├── check-cloudsql.sh           # インスタンス情報確認
+│   └── troubleshoot-cloudsql.sh    # トラブルシューティング
+├── 🚀 アプリケーション
+│   ├── main.go                     # エントリーポイント
+│   ├── go.mod / go.sum             # Go依存関係
+│   └── internal/                   # アプリケーションコード
+│       ├── config/                 # 設定管理
+│       ├── domain/                 # ドメイン層
+│       ├── application/            # アプリケーション層
+│       ├── infrastructure/         # インフラストラクチャ層
+│       ├── interfaces/             # インターフェース層
+│       └── database/               # データベース管理
+├── ⚙️ 設定ファイル
+│   ├── .env.example                # 環境変数テンプレート
+│   ├── .gitignore                  # Git除外設定
+│   ├── Makefile                    # ビルド・タスク管理
+│   └── init.sql                    # DB初期化
+└── 🗂️ 自動生成/除外
+    ├── .env                        # 環境変数（Git除外）
+    ├── .env.local                  # ローカル環境（自動生成）
+    └── cloud-sql-proxy            # バイナリ（自動DL）
 ```
 
 ## 🐛 トラブルシューティング
 
-### よくある問題
+### 自動診断ツール
+
+```bash
+# Cloud SQL関連の問題を自動診断
+make cloudsql-troubleshoot
+
+# または直接実行
+./troubleshoot-cloudsql.sh
+```
+
+### よくある問題と解決策
 
 1. **ポートが既に使用されている**
    ```bash
@@ -508,6 +691,35 @@ time curl -s http://localhost:8080/api/v1/files
 ## 📖 詳細仕様
 
 詳細なAPI仕様については `API_DOCS.md` を参照してください。
+
+## 🔧 セットアップスクリプト詳細
+
+### 利用可能なスクリプト
+
+- **`setup-cloud-sql-complete.sh`** - 完全自動セットアップ（推奨）
+  - PostgreSQLクライアント自動インストール
+  - Cloud SQL Auth Proxy自動ダウンロード・設定
+  - パスワード設定（対話的）
+  - 接続テスト・動作確認
+
+- **`setup-cloudsql-proxy.sh`** - 基本セットアップ
+  - Cloud SQL Auth Proxyダウンロード
+  - `.env.local` ファイル生成
+
+- **`check-cloudsql.sh`** - Cloud SQL情報確認
+  - インスタンス詳細情報表示
+  - 接続名生成
+  - データベース・ユーザー一覧
+
+- **`troubleshoot-cloudsql.sh`** - トラブルシューティング
+  - システム状況自動診断
+  - 問題の自動検出
+  - 解決方法の提示
+
+- **`deploy-cloudrun.sh`** - Cloud Runデプロイ
+  - Cloud Build実行
+  - 必要なAPI有効化
+  - サービス情報表示
 
 ## 📝 ライセンス
 

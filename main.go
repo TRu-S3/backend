@@ -11,6 +11,7 @@ import (
 
 	"github.com/TRu-S3/backend/internal/application"
 	"github.com/TRu-S3/backend/internal/config"
+	"github.com/TRu-S3/backend/internal/database"
 	"github.com/TRu-S3/backend/internal/infrastructure"
 	"github.com/TRu-S3/backend/internal/interfaces"
 	"github.com/gin-gonic/gin"
@@ -30,15 +31,26 @@ func main() {
 	if err := cfg.Validate(); err != nil {
 		log.Fatalf("Invalid configuration: %v", err)
 	}
-
 	// Display configuration info
 	log.Printf("Configuration loaded:")
 	log.Printf("  Port: %s", cfg.Port)
 	log.Printf("  Gin Mode: %s", cfg.GinMode)
 	log.Printf("  GCS Bucket: %s", cfg.GCSBucketName)
 	log.Printf("  GCS Folder: %s", cfg.GCSFolder)
+	log.Printf("  Database: %s:%s/%s", cfg.DBHost, cfg.DBPort, cfg.DBName)
 	if cfg.GoogleCloudProject != "" {
 		log.Printf("  GCP Project: %s", cfg.GoogleCloudProject)
+	}
+
+	// Connect to database
+	if err := database.Connect(cfg); err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer database.Close()
+
+	// Run database migrations
+	if err := database.Migrate(database.GetDB()); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
 	// Create context with cancellation

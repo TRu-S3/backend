@@ -1,0 +1,51 @@
+# Cloud SQL Auth Proxy向けのDocker Compose設定
+# Cloud Run本番環境でのテスト・検証用
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - GIN_MODE=release
+      - USE_CLOUD_SQL_PROXY=true
+      - CLOUD_SQL_CONNECTION_NAME=${CLOUD_SQL_CONNECTION_NAME}
+      - DB_NAME=${DB_NAME:-tru_s3}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSL_MODE=${DB_SSL_MODE:-require}
+      - GCS_BUCKET_NAME=${GCS_BUCKET_NAME}
+      - GCS_FOLDER=${GCS_FOLDER:-test}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+    volumes:
+      - /cloudsql:/cloudsql
+      # サービスアカウントキーファイルを使用する場合（推奨：Workload Identityを使用）
+      # - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/service-account-key.json:ro
+    restart: unless-stopped
+    depends_on:
+      - cloud-sql-proxy
+
+  cloud-sql-proxy:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+    command:
+      - /cloud-sql-proxy
+      - ${CLOUD_SQL_CONNECTION_NAME}
+      - --address=0.0.0.0
+      - --port=5432
+      - --unix-socket=/cloudsql
+      # - --credentials-file=/config/service-account-key.json  # サービスアカウントキーを使用する場合
+    volumes:
+      - /cloudsql:/cloudsql
+      # - ${GOOGLE_APPLICATION_CREDENTIALS}:/config/service-account-key.json:ro
+    restart: unless-stopped
+    # healthcheck:
+    #   test: ["CMD", "nc", "-z", "localhost", "5432"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+
+# 注意: 
+# 1. CLOUD_SQL_CONNECTION_NAME は project-id:region:instance-name の形式
+# 2. 本番環境ではWorkload IdentityまたはCloud Runの自動認証を推奨
+# 3. サービスアカウントキーファイルは最後の手段として使用
