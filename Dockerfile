@@ -22,15 +22,18 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 # Final stage
 FROM alpine:latest
 
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates
+# Install ca-certificates for HTTPS requests and netcat for health checks
+RUN apk --no-cache add ca-certificates netcat-openbsd
 
 WORKDIR /root/
 
 # Copy the binary from builder stage
 COPY --from=builder /app/main .
 
-# Expose port (adjust if your application uses a different port)
+# Create cloudsql directory for Cloud SQL Auth Proxy socket (Cloud Run用)
+RUN mkdir -p /cloudsql
+
+# Expose port (Cloud Run expects the application to listen on $PORT)
 EXPOSE 8080
 
 # Command to run the application

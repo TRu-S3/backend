@@ -43,7 +43,35 @@ Thumbs.db
 # GCP credentials
 *.json
 !**/testdata/**/*.json
+!cloudbuild.yaml
+!package*.json
 
 # Temporary files
 tmp/
 temp/
+*.tmp
+*.temp
+
+# Cloud SQL Auth Proxy binary
+cloud-sql-proxy*
+/cloud-sql-proxy
+
+# Local development files
+.env.local.*
+test-upload.txt
+upload-test.*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes
+postgres_data/
+
+# Go module cache
+/go/pkg/mod/
+
+# Coverage reports
+*.out
+coverage.html
