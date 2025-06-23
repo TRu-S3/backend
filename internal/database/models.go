@@ -2,7 +2,6 @@ package database
 
 import (
 	"log"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -25,30 +24,11 @@ func (FileMetadata) TableName() string {
 	return "file_metadata"
 }
 
-// Contest represents contest information stored in database
-type Contest struct {
-	ID                   uint      `gorm:"primaryKey" json:"id"`
-	BackendQuota         int       `gorm:"not null;default:0" json:"backend_quota"`
-	FrontendQuota        int       `gorm:"not null;default:0" json:"frontend_quota"`
-	AIQuota              int       `gorm:"not null;default:0" json:"ai_quota"`
-	ApplicationDeadline  time.Time `gorm:"not null" json:"application_deadline"`
-	Purpose              string    `gorm:"not null;type:text" json:"purpose"`
-	Message              string    `gorm:"not null;type:text" json:"message"`
-	AuthorID             uint      `gorm:"not null" json:"author_id"`
-	CreatedAt            time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt            time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-}
-
-// TableName sets the table name for Contest
-func (Contest) TableName() string {
-	return "contests"
-}
-
 // Migrate runs database migrations
 func Migrate(db *gorm.DB) error {
 	log.Println("Running database migrations...")
 
-	if err := db.AutoMigrate(&FileMetadata{}, &Contest{}); err != nil {
+	if err := db.AutoMigrate(&FileMetadata{}); err != nil {
 		return err
 	}
 
@@ -63,19 +43,6 @@ func Migrate(db *gorm.DB) error {
 
 	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_file_metadata_created_at ON file_metadata(created_at)").Error; err != nil {
 		log.Printf("Warning: Could not create index on created_at: %v", err)
-	}
-
-	// Add contest indexes
-	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_contests_author_id ON contests(author_id)").Error; err != nil {
-		log.Printf("Warning: Could not create index on contests author_id: %v", err)
-	}
-
-	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_contests_application_deadline ON contests(application_deadline)").Error; err != nil {
-		log.Printf("Warning: Could not create index on contests application_deadline: %v", err)
-	}
-
-	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_contests_created_at ON contests(created_at)").Error; err != nil {
-		log.Printf("Warning: Could not create index on contests created_at: %v", err)
 	}
 
 	log.Println("Database migrations completed successfully")
