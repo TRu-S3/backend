@@ -76,6 +76,9 @@ func main() {
 	// Create handler
 	fileHandler := interfaces.NewFileHandler(fileService)
 
+	// Create contest handler
+	contestHandler := interfaces.NewContestHandler(database.GetDB())
+
 	// Set Gin mode from configuration
 	gin.SetMode(cfg.GinMode)
 
@@ -112,7 +115,7 @@ func main() {
 	})
 
 	// Setup API routes
-	interfaces.SetupRoutes(r, fileHandler)
+	interfaces.SetupRoutes(r, fileHandler, contestHandler)
 
 	// Create HTTP server with port from configuration
 	srv := &http.Server{

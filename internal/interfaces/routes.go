@@ -5,7 +5,7 @@ import (
 )
 
 // SetupRoutes sets up all routes for the application
-func SetupRoutes(r *gin.Engine, fileHandler *FileHandler) {
+func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *ContestHandler) {
 	// API v1 routes
 	v1 := r.Group("/api/v1")
 	{
@@ -18,6 +18,16 @@ func SetupRoutes(r *gin.Engine, fileHandler *FileHandler) {
 			files.GET("/:id/download", fileHandler.DownloadFile) // Download file content
 			files.PUT("/:id", fileHandler.UpdateFile)            // Update file
 			files.DELETE("/:id", fileHandler.DeleteFile)         // Delete file
+		}
+
+		// Contest routes
+		contests := v1.Group("/contests")
+		{
+			contests.POST("", contestHandler.CreateContest)   // Create contest
+			contests.GET("", contestHandler.ListContests)     // List contests
+			contests.GET("/:id", contestHandler.GetContest)   // Get contest by ID
+			contests.PUT("/:id", contestHandler.UpdateContest) // Update contest
+			contests.DELETE("/:id", contestHandler.DeleteContest) // Delete contest
 		}
 	}
 }
