@@ -76,6 +76,18 @@ func main() {
 	// Create handler
 	fileHandler := interfaces.NewFileHandler(fileService)
 
+	// Create user handler
+	userHandler := interfaces.NewUserHandler(database.GetDB())
+
+	// Create tag handler
+	tagHandler := interfaces.NewTagHandler(database.GetDB())
+
+	// Create profile handler
+	profileHandler := interfaces.NewProfileHandler(database.GetDB())
+
+	// Create matching handler
+	matchingHandler := interfaces.NewMatchingHandler(database.GetDB())
+
 	// Create contest handler
 	contestHandler := interfaces.NewContestHandler(database.GetDB())
 
@@ -121,7 +133,7 @@ func main() {
 	})
 
 	// Setup API routes
-	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler, hackathonHandler)
+	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler, hackathonHandler, userHandler, tagHandler, profileHandler, matchingHandler)
 
 	// Create HTTP server with port from configuration
 	srv := &http.Server{

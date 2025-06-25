@@ -1,28 +1,45 @@
-# 🏆 TRu-S3 Backend
+# TRu-S3 Backend
 
-**マッチングアプリ + ファイル管理システム**
+**包括的なマッチングアプリケーション + ファイル管理システム**
 
-## 🎯 概要
+## 概要
 
-TRu-S3は、Google Cloud Platform上で動作するマッチングアプリケーションとファイル管理システムを統合したバックエンドAPIです。オニオンアーキテクチャを採用し、高い保守性とテスタビリティを実現しています。
+TRu-S3は、Google Cloud Platform上で動作する包括的なマッチングアプリケーションとファイル管理システムを統合したバックエンドAPIです。Clean Architectureを採用し、高い保守性とテスタビリティを実現しています。
 
-### 🌟 主な機能
+## **最新の実装状況**
 
-- **👥 マッチングシステム**: ユーザープロフィール、マッチング、ブックマーク機能
-- **🏆 ハッカソン管理**: ハッカソンイベントと参加者管理
-- **📁 ファイル管理**: GCS連携によるファイルアップロード・管理
-- **🏁 コンテスト機能**: プログラミングコンテスト管理
+**完全実装済み機能**:
+- **ユーザー管理**: 完全CRUD + 認証準備
+- **タグ管理**: プロフィールカテゴリ化
+- **プロフィール管理**: 詳細ユーザー情報 + 年齢・地域フィルタ  
+- **マッチング機能**: ユーザー間マッチング + ステータス管理
+- **ブックマーク機能**: お気に入りユーザー管理
+- **コンテスト管理**: プログラミングコンテスト運営
+- **ハッカソン管理**: イベント + 参加者管理
+- **ファイル管理**: GCS連携ファイルシステム
 
-### ✨ 技術的特徴
+**データベース**: PostgreSQL 17 on Google Cloud SQL (10テーブル、完全正規化)  
+**API エンドポイント**: 45+ の REST API  
+**本番環境**: Google Cloud Run + Cloud SQL 運用中
 
-- **🏗️ オニオンアーキテクチャ**: 保守性・テスタビリティを重視した設計
-- **☁️ GCP完全対応**: Cloud Storage + Cloud SQL + Cloud Run
-- **🔐 セキュア**: 複数レベルのセキュリティ設定（IAM認証、SSL/TLS、プライベートIP）
-- **🐳 Docker対応**: ローカル開発から本番デプロイまで統一環境
-- **🚀 自動化**: ワンコマンドセットアップ・デプロイ
-- **📚 日本語対応**: 包括的な日本語APIドキュメント
+### 主な機能
 
-### 🛠️ 技術スタック
+- **ユーザー管理システム**: ユーザー登録・プロフィール・タグ分類
+- **マッチング機能**: ユーザー間マッチング・ブックマーク・承認フロー
+- **イベント管理**: ハッカソン・コンテスト運営システム
+- **ファイル管理**: GCS連携ファイルアップロード・管理
+- **高度検索**: 年齢・地域・タグ・ステータス別フィルタリング
+
+### 技術的特徴
+
+- **オニオンアーキテクチャ**: 保守性・テスタビリティを重視した設計
+- **GCP完全対応**: Cloud Storage + Cloud SQL + Cloud Run
+- **セキュア**: 複数レベルのセキュリティ設定（IAM認証、SSL/TLS、プライベートIP）
+- **Docker対応**: ローカル開発から本番デプロイまで統一環境
+- **自動化**: ワンコマンドセットアップ・デプロイ
+- **日本語対応**: 包括的な日本語APIドキュメント
+
+### 技術スタック
 
 - **言語**: Go 1.24.2
 - **フレームワーク**: Gin (HTTP)、GORM (ORM)
@@ -31,7 +48,7 @@ TRu-S3は、Google Cloud Platform上で動作するマッチングアプリケ�
 - **インフラ**: Docker、Cloud Run、Cloud Build
 - **認証**: GCP IAM、Cloud SQL Auth Proxy
 
-## 🏗️ アーキテクチャ
+## アーキテクチャ
 
 ```
 internal/
@@ -42,7 +59,7 @@ internal/
 └── config/         # 設定管理
 ```
 
-## � 要件
+## 要件
 
 ### 開発環境
 - Go 1.24.2+
@@ -53,9 +70,9 @@ internal/
 - Docker
 - Docker Compose
 
-## 🚀 セットアップ
+## セットアップ
 
-### 🛠️ 利用可能なコマンド
+### 利用可能なコマンド
 
 ```bash
 # ヘルプ表示（全コマンド確認）
@@ -166,7 +183,7 @@ go run main.go
 docker-compose up --build -d
 ```
 
-## 📚 API使用方法
+## API使用方法
 
 ### 基本情報
 - **ベースURL**: `http://localhost:8080`
@@ -282,7 +299,7 @@ curl -X DELETE http://localhost:8080/api/v1/files/test.txt
 {"message":"File deleted successfully"}
 ```
 
-## 💡 使用例
+## 使用例
 
 ### 完全なワークフロー例
 
@@ -332,7 +349,7 @@ curl -s http://localhost:8080/api/v1/files | jq -r '.files[].id' | while read fi
 done
 ```
 
-## 🐳 Docker操作
+## Docker操作
 
 ### 基本コマンド
 
@@ -359,7 +376,7 @@ docker-compose down --rmi all --volumes --remove-orphans
 docker-compose exec app sh
 ```
 
-## 🛠️ ローカル開発
+## ローカル開発
 
 Dockerを使用せずにローカルで実行する場合：
 
@@ -374,11 +391,11 @@ go run main.go
 PORT=8081 go run main.go
 ```
 
-## ☁️ Cloud SQL Auth Proxy
+## Cloud SQL Auth Proxy
 
 本番環境では既存のCloud SQL PostgreSQLインスタンス（プロジェクト: `zenn-ai-agent-hackathon-460205`, インスタンス: `prd-db`）を使用してCloud SQL Auth Proxyで接続します。
 
-> 📖 **詳細なセットアップ手順は [CLOUD_SQL_SETUP.md](./CLOUD_SQL_SETUP.md) を参照してください**
+> **詳細なセットアップ手順は [CLOUD_SQL_SETUP.md](./CLOUD_SQL_SETUP.md) を参照してください**
 
 ### クイックセットアップ
 
@@ -465,7 +482,7 @@ curl https://your-service-url/health
 curl https://your-service-url/api/v1/files
 ```
 
-## 📡 API エンドポイント一覧
+## API エンドポイント一覧
 
 ### 基本API
 | エンドポイント | メソッド | 説明 |
@@ -511,11 +528,11 @@ curl https://your-service-url/api/v1/files
 | `/api/v1/hackathons/:id/participants` | POST | 参加者登録 |
 | `/api/v1/hackathons/:id/participants/:participant_id` | DELETE | 参加者削除 |
 
-## 📁 プロジェクト構造
+## プロジェクト構造
 
 ```
 TRu-S3/
-├── 📖 ドキュメント
+├── ドキュメント
 │   ├── README.md                    # メインドキュメント
 │   └── docs/                       # 詳細ドキュメント
 │       ├── README.md               # ドキュメント索引
@@ -523,16 +540,16 @@ TRu-S3/
 │       ├── SECURITY.md            # セキュリティガイド
 │       ├── DATABASE.md            # データベース設定
 │       └── CLOUD_SQL.md           # Cloud SQL詳細ガイド
-├── 🐳 Docker設定
+├── Docker設定
 │   ├── Dockerfile                   # メインDockerfile（Cloud Run対応）
 │   ├── docker-compose.yml          # ローカル開発用
 │   ├── docker-compose.cloudsql.yml # Cloud SQL用
 │   ├── docker-compose.prod.yml     # 本番用（セキュリティ強化）
 │   └── .dockerignore               # Docker除外設定
-├── ☁️ Cloud設定
+├── Cloud設定
 │   ├── cloudbuild.yaml             # Cloud Build設定
 │   └── .github/                    # GitHub Actions設定
-├── 🔧 スクリプト
+├── スクリプト
 │   └── scripts/                    # セットアップ・管理スクリプト
 │       ├── setup-cloud-sql-proxy.sh # Cloud SQL Proxyセットアップ
 │       ├── setup-iam-auth.sh       # IAM認証セットアップ
@@ -540,7 +557,7 @@ TRu-S3/
 │       ├── check-cloudsql.sh       # インスタンス情報確認
 │       ├── troubleshoot-cloudsql.sh # トラブルシューティング
 │       └── deploy-cloudrun.sh      # Cloud Runデプロイ
-├── 🚀 アプリケーション
+├── アプリケーション
 │   ├── main.go                     # エントリーポイント
 │   ├── go.mod / go.sum             # Go依存関係
 │   └── internal/                   # アプリケーションコード
@@ -550,29 +567,29 @@ TRu-S3/
 │       ├── infrastructure/         # インフラストラクチャ層
 │       ├── interfaces/             # インターフェース層
 │       └── database/               # データベース管理
-├── 🗃️ データベース
+├── データベース
 │   └── migrations/                 # マイグレーションファイル
 │       ├── 001_create_basic_tables_gcp.sql
 │       ├── 002_add_missing_tables_gcp.sql
 │       ├── 003_create_hackathons_table.sql
 │       └── ...
-├── 🧪 テスト・ユーティリティ
+├── テスト・ユーティリティ
 │   └── test/                       # テスト・検証ファイル
 │       ├── test_secure_connection.go
 │       ├── verify_gcp_db.go
 │       └── migrate_gcp.go
-├── ⚙️ 設定ファイル
+├── 設定ファイル
 │   ├── .env.example                # 環境変数テンプレート
 │   ├── .gitignore                  # Git除外設定
 │   └── Makefile                    # ビルド・タスク管理
-└── 🗂️ 自動生成/除外
+└── 自動生成/除外
     ├── .env*                       # 環境変数（Git除外）
     ├── cloud-sql-proxy            # バイナリ（自動DL）
     ├── ssl-certs/                  # SSL証明書（自動生成）
     └── service-account.json        # サービスアカウント（Git除外）
 ```
 
-## 🐛 トラブルシューティング
+## トラブルシューティング
 
 ### 自動診断ツール
 
@@ -661,7 +678,7 @@ curl -s http://localhost:8080/health | jq .
 gsutil ls gs://202506-zenn-ai-agent-hackathon/test/
 ```
 
-## 🔄 開発ワークフロー
+## 開発ワークフロー
 
 ### 機能開発
 
@@ -699,7 +716,7 @@ gsutil ls gs://202506-zenn-ai-agent-hackathon/test/
    docker build -t tru-s3:latest .
    ```
 
-## 📊 パフォーマンス監視
+## パフォーマンス監視
 
 ### 基本的な監視
 
@@ -727,7 +744,7 @@ done
 time curl -s http://localhost:8080/api/v1/files
 ```
 
-## 🤝 貢献
+## 貢献
 
 プロジェクトへの貢献を歓迎します！
 
@@ -746,14 +763,14 @@ time curl -s http://localhost:8080/api/v1/files
 - テストを書く
 - コミットメッセージは明確に
 
-## 📖 詳細ドキュメント
+## 詳細ドキュメント
 
-- **[📋 API仕様書 (日本語)](./docs/API_DOCUMENTATION.md)** - 全APIの詳細仕様
-- **[🔐 セキュリティガイド](./docs/SECURITY.md)** - Cloud SQL接続とセキュリティ設定
-- **[💾 データベース設定](./docs/DATABASE.md)** - マッチングアプリDB設定手順
-- **[☁️ Cloud SQL設定](./docs/CLOUD_SQL.md)** - Cloud SQL詳細セットアップ
+- **[API仕様書 (日本語)](./docs/API_DOCUMENTATION.md)** - 全APIの詳細仕様
+- **[セキュリティガイド](./docs/SECURITY.md)** - Cloud SQL接続とセキュリティ設定
+- **[データベース設定](./docs/DATABASE.md)** - マッチングアプリDB設定手順
+- **[Cloud SQL設定](./docs/CLOUD_SQL.md)** - Cloud SQL詳細セットアップ
 
-## 🔧 セットアップスクリプト詳細
+## セットアップスクリプト詳細
 
 ### 利用可能なスクリプト
 
@@ -782,11 +799,11 @@ time curl -s http://localhost:8080/api/v1/files
   - 必要なAPI有効化
   - サービス情報表示
 
-## 📝 ライセンス
+## ライセンス
 
 MIT License
 
-## 📞 サポート
+## サポート
 
 - 問題報告: GitHub Issues
 - 質問: Discussions

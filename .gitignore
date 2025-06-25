@@ -82,6 +82,9 @@ cloud_sql_proxy
 verification_export.csv
 *.csv
 
+# Database scripts with main functions (exclude from tests)
+scripts/db/
+
 # Backup files
 *.bak
 *.backup

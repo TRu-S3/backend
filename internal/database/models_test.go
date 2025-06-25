@@ -59,7 +59,7 @@ func TestContestModel(t *testing.T) {
 			AIQuota:             1,
 			ApplicationDeadline: time.Now().Add(24 * time.Hour),
 			// Missing Purpose and Message
-			AuthorID:            1,
+			AuthorID: 1,
 		}
 		err := db.Create(&contest).Error
 		// In SQLite, empty strings are allowed, so we test with proper validation

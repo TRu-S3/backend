@@ -24,6 +24,11 @@ type Contest struct {
 	UpdatedAt           time.Time `json:"updated_at"`
 }
 
+// TableName returns the table name for the Contest model
+func (Contest) TableName() string {
+	return "contests"
+}
+
 // Models returns all contest-related models for migration
 var Models = []interface{}{
 	&Contest{},

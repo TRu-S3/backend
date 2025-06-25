@@ -479,6 +479,76 @@ func (h *HackathonHandler) ListParticipants(c *gin.Context) {
 	})
 }
 
+type UpdateParticipantRequest struct {
+	TeamName *string `json:"team_name,omitempty"`
+	Role     *string `json:"role,omitempty"`
+	Status   *string `json:"status,omitempty"`
+	Notes    *string `json:"notes,omitempty"`
+}
+
+// UpdateParticipant handles PUT /api/v1/hackathons/:id/participants/:participant_id
+func (h *HackathonHandler) UpdateParticipant(c *gin.Context) {
+	hackathonID := c.Param("id")
+	participantID := c.Param("participant_id")
+	var participant database.HackathonParticipant
+	var req UpdateParticipantRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Find existing participant
+	if err := h.db.Where("hackathon_id = ? AND id = ?", hackathonID, participantID).First(&participant).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Participant not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve participant"})
+		}
+		return
+	}
+
+	// Update fields if provided
+	if req.TeamName != nil {
+		participant.TeamName = *req.TeamName
+	}
+
+	if req.Role != nil {
+		participant.Role = *req.Role
+	}
+
+	if req.Status != nil {
+		// Validate status
+		validStatuses := []string{"registered", "confirmed", "cancelled", "disqualified"}
+		valid := false
+		for _, status := range validStatuses {
+			if *req.Status == status {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status. Must be one of: registered, confirmed, cancelled, disqualified"})
+			return
+		}
+		participant.Status = *req.Status
+	}
+
+	if req.Notes != nil {
+		participant.Notes = *req.Notes
+	}
+
+	if err := h.db.Save(&participant).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update participant"})
+		return
+	}
+
+	// Load relationships for response
+	h.db.Preload("User").Preload("Hackathon").First(&participant, participant.ID)
+
+	c.JSON(http.StatusOK, participant)
+}
+
 // DeleteParticipant handles DELETE /api/v1/hackathons/:id/participants/:participant_id
 func (h *HackathonHandler) DeleteParticipant(c *gin.Context) {
 	hackathonID := c.Param("id")
