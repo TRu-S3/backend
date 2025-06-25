@@ -1,17 +1,28 @@
-# TRu-S3 Backend
+# 🏆 TRu-S3 Backend
+
+**マッチングアプリ + ファイル管理システム**
 
 ## 🎯 概要
 
-### 主な特徴
+TRu-S3は、Google Cloud Platform上で動作するマッチングアプリケーションとファイル管理システムを統合したバックエンドAPIです。オニオンアーキテクチャを採用し、高い保守性とテスタビリティを実現しています。
+
+### 🌟 主な機能
+
+- **👥 マッチングシステム**: ユーザープロフィール、マッチング、ブックマーク機能
+- **🏆 ハッカソン管理**: ハッカソンイベントと参加者管理
+- **📁 ファイル管理**: GCS連携によるファイルアップロード・管理
+- **🏁 コンテスト機能**: プログラミングコンテスト管理
+
+### ✨ 技術的特徴
 
 - **🏗️ オニオンアーキテクチャ**: 保守性・テスタビリティを重視した設計
 - **☁️ GCP完全対応**: Cloud Storage + Cloud SQL + Cloud Run
-- **🔐 セキュア**: Cloud SQL Auth Proxy による安全なDB接続
+- **🔐 セキュア**: 複数レベルのセキュリティ設定（IAM認証、SSL/TLS、プライベートIP）
 - **🐳 Docker対応**: ローカル開発から本番デプロイまで統一環境
 - **🚀 自動化**: ワンコマンドセットアップ・デプロイ
-- **🛠️ 開発者体験**: 包括的なドキュメント・トラブルシューティング
+- **📚 日本語対応**: 包括的な日本語APIドキュメント
 
-### 技術スタック
+### 🛠️ 技術スタック
 
 - **言語**: Go 1.24.2
 - **フレームワーク**: Gin (HTTP)、GORM (ORM)
@@ -19,12 +30,6 @@
 - **ストレージ**: Google Cloud Storage
 - **インフラ**: Docker、Cloud Run、Cloud Build
 - **認証**: GCP IAM、Cloud SQL Auth Proxy
-
-### 対象ファイル
-
-- **バケット**: `202506-zenn-ai-agent-hackathon`
-- **フォルダ**: `test`
-- **操作**: アップロード、ダウンロード、一覧、更新、削除
 
 ## 🏗️ アーキテクチャ
 
@@ -462,10 +467,15 @@ curl https://your-service-url/api/v1/files
 
 ## 📡 API エンドポイント一覧
 
+### 基本API
 | エンドポイント | メソッド | 説明 |
 |-------------|--------|------|
 | `/` | GET | メイン エンドポイント |
 | `/health` | GET | ヘルスチェック |
+
+### ファイル管理API
+| エンドポイント | メソッド | 説明 |
+|-------------|--------|------|
 | `/api/v1/files` | GET | ファイル一覧取得 |
 | `/api/v1/files` | POST | ファイルアップロード |
 | `/api/v1/files/:id` | GET | ファイル情報取得 |
@@ -473,26 +483,63 @@ curl https://your-service-url/api/v1/files
 | `/api/v1/files/:id` | PUT | ファイル更新 |
 | `/api/v1/files/:id` | DELETE | ファイル削除 |
 
+### マッチングAPI
+| エンドポイント | メソッド | 説明 |
+|-------------|--------|------|
+| `/api/v1/bookmarks` | GET | ブックマーク一覧 |
+| `/api/v1/bookmarks` | POST | ブックマーク作成 |
+| `/api/v1/bookmarks/:id` | DELETE | ブックマーク削除 |
+
+### コンテストAPI
+| エンドポイント | メソッド | 説明 |
+|-------------|--------|------|
+| `/api/v1/contests` | GET | コンテスト一覧 |
+| `/api/v1/contests` | POST | コンテスト作成 |
+| `/api/v1/contests/:id` | GET | コンテスト詳細 |
+| `/api/v1/contests/:id` | PUT | コンテスト更新 |
+| `/api/v1/contests/:id` | DELETE | コンテスト削除 |
+
+### ハッカソンAPI
+| エンドポイント | メソッド | 説明 |
+|-------------|--------|------|
+| `/api/v1/hackathons` | GET | ハッカソン一覧 |
+| `/api/v1/hackathons` | POST | ハッカソン作成 |
+| `/api/v1/hackathons/:id` | GET | ハッカソン詳細 |
+| `/api/v1/hackathons/:id` | PUT | ハッカソン更新 |
+| `/api/v1/hackathons/:id` | DELETE | ハッカソン削除 |
+| `/api/v1/hackathons/:id/participants` | GET | 参加者一覧 |
+| `/api/v1/hackathons/:id/participants` | POST | 参加者登録 |
+| `/api/v1/hackathons/:id/participants/:participant_id` | DELETE | 参加者削除 |
+
 ## 📁 プロジェクト構造
 
 ```
 TRu-S3/
 ├── 📖 ドキュメント
 │   ├── README.md                    # メインドキュメント
-│   └── CLOUD_SQL_SETUP.md          # Cloud SQL詳細ガイド
+│   └── docs/                       # 詳細ドキュメント
+│       ├── README.md               # ドキュメント索引
+│       ├── API_DOCUMENTATION.md   # 日本語API仕様書
+│       ├── SECURITY.md            # セキュリティガイド
+│       ├── DATABASE.md            # データベース設定
+│       └── CLOUD_SQL.md           # Cloud SQL詳細ガイド
 ├── 🐳 Docker設定
 │   ├── Dockerfile                   # メインDockerfile（Cloud Run対応）
 │   ├── docker-compose.yml          # ローカル開発用
 │   ├── docker-compose.cloudsql.yml # Cloud SQL用
+│   ├── docker-compose.prod.yml     # 本番用（セキュリティ強化）
 │   └── .dockerignore               # Docker除外設定
 ├── ☁️ Cloud設定
 │   ├── cloudbuild.yaml             # Cloud Build設定
-│   └── deploy-cloudrun.sh          # Cloud Runデプロイ
-├── 🔧 セットアップスクリプト
-│   ├── setup-cloud-sql-complete.sh # 完全自動セットアップ
-│   ├── setup-cloudsql-proxy.sh     # Cloud SQL Proxyセットアップ
-│   ├── check-cloudsql.sh           # インスタンス情報確認
-│   └── troubleshoot-cloudsql.sh    # トラブルシューティング
+│   └── .github/                    # GitHub Actions設定
+├── 🔧 スクリプト
+│   └── scripts/                    # セットアップ・管理スクリプト
+│       ├── setup-cloud-sql-proxy.sh # Cloud SQL Proxyセットアップ
+│       ├── setup-iam-auth.sh       # IAM認証セットアップ
+│       ├── setup-network-security.sh # ネットワークセキュリティ
+│       ├── check-cloudsql.sh       # インスタンス情報確認
+│       ├── troubleshoot-cloudsql.sh # トラブルシューティング
+│       └── deploy-cloudrun.sh      # Cloud Runデプロイ
 ├── 🚀 アプリケーション
 │   ├── main.go                     # エントリーポイント
 │   ├── go.mod / go.sum             # Go依存関係
@@ -503,15 +550,26 @@ TRu-S3/
 │       ├── infrastructure/         # インフラストラクチャ層
 │       ├── interfaces/             # インターフェース層
 │       └── database/               # データベース管理
+├── 🗃️ データベース
+│   └── migrations/                 # マイグレーションファイル
+│       ├── 001_create_basic_tables_gcp.sql
+│       ├── 002_add_missing_tables_gcp.sql
+│       ├── 003_create_hackathons_table.sql
+│       └── ...
+├── 🧪 テスト・ユーティリティ
+│   └── test/                       # テスト・検証ファイル
+│       ├── test_secure_connection.go
+│       ├── verify_gcp_db.go
+│       └── migrate_gcp.go
 ├── ⚙️ 設定ファイル
 │   ├── .env.example                # 環境変数テンプレート
 │   ├── .gitignore                  # Git除外設定
-│   ├── Makefile                    # ビルド・タスク管理
-│   └── init.sql                    # DB初期化
+│   └── Makefile                    # ビルド・タスク管理
 └── 🗂️ 自動生成/除外
-    ├── .env                        # 環境変数（Git除外）
-    ├── .env.local                  # ローカル環境（自動生成）
-    └── cloud-sql-proxy            # バイナリ（自動DL）
+    ├── .env*                       # 環境変数（Git除外）
+    ├── cloud-sql-proxy            # バイナリ（自動DL）
+    ├── ssl-certs/                  # SSL証明書（自動生成）
+    └── service-account.json        # サービスアカウント（Git除外）
 ```
 
 ## 🐛 トラブルシューティング
@@ -688,9 +746,12 @@ time curl -s http://localhost:8080/api/v1/files
 - テストを書く
 - コミットメッセージは明確に
 
-## 📖 詳細仕様
+## 📖 詳細ドキュメント
 
-詳細なAPI仕様については `API_DOCS.md` を参照してください。
+- **[📋 API仕様書 (日本語)](./docs/API_DOCUMENTATION.md)** - 全APIの詳細仕様
+- **[🔐 セキュリティガイド](./docs/SECURITY.md)** - Cloud SQL接続とセキュリティ設定
+- **[💾 データベース設定](./docs/DATABASE.md)** - マッチングアプリDB設定手順
+- **[☁️ Cloud SQL設定](./docs/CLOUD_SQL.md)** - Cloud SQL詳細セットアップ
 
 ## 🔧 セットアップスクリプト詳細
 

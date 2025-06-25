@@ -12,11 +12,6 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-const (
-	DefaultBucketName = "202506-zenn-ai-agent-hackathon"
-	DefaultFolder     = "test"
-)
-
 // GCSFileRepository implements domain.FileRepository using Google Cloud Storage
 type GCSFileRepository struct {
 	client     *storage.Client
@@ -27,10 +22,10 @@ type GCSFileRepository struct {
 // NewGCSFileRepository creates a new GCSFileRepository
 func NewGCSFileRepository(client *storage.Client, bucketName, folder string) *GCSFileRepository {
 	if bucketName == "" {
-		bucketName = DefaultBucketName
+		panic("bucket name is required for GCS file repository")
 	}
 	if folder == "" {
-		folder = DefaultFolder
+		folder = "uploads" // Use a more generic default
 	}
 
 	return &GCSFileRepository{

@@ -4,22 +4,27 @@
 *.dll
 *.so
 *.dylib
+backend
+tru-s3
+cloud-sql-proxy*
 
 # Test binary, built with `go test -c`
 *.test
 
-# Output of the go build command
-/backend
-/tru-s3
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
 
 # Go workspace file
 go.work
 go.work.sum
 
-# Environment variables
+# Environment files
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
 # IDE files
 .vscode/
@@ -39,39 +44,50 @@ Thumbs.db
 
 # Logs
 *.log
-
-# GCP credentials
-*.json
-!**/testdata/**/*.json
-!cloudbuild.yaml
-!package*.json
+logs/
+log/
 
 # Temporary files
-tmp/
-temp/
 *.tmp
 *.temp
-
-# Cloud SQL Auth Proxy binary
-cloud-sql-proxy*
-/cloud-sql-proxy
-
-# Local development files
-.env.local.*
 test-upload.txt
-upload-test.*
+downloaded_*
 
 # Database files
 *.db
 *.sqlite
 *.sqlite3
 
+# SSL certificates and keys
+ssl-certs/
+*.pem
+*.key
+*.crt
+
+# Service account files
+service-account.json
+*.json
+!cloudbuild.yaml
+!package.json
+!**/testdata/**/*.json
+
 # Docker volumes
+postgres-data/
 postgres_data/
+
+# Cloud SQL Auth Proxy
+cloud_sql_proxy
+
+# Test and migration outputs
+verification_export.csv
+*.csv
+
+# Backup files
+*.bak
+*.backup
 
 # Go module cache
 /go/pkg/mod/
 
 # Coverage reports
-*.out
 coverage.html

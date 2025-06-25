@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Config holds application configuration
@@ -91,8 +92,73 @@ func (c *Config) GetPortInt() int {
 
 // Validate validates the configuration
 func (c *Config) Validate() error {
-	// Add validation logic here if needed
+	var errors []string
+
+	// Validate server configuration
+	if c.Port == "" {
+		errors = append(errors, "PORT is required")
+	}
+	if _, err := strconv.Atoi(c.Port); err != nil {
+		errors = append(errors, "PORT must be a valid number")
+	}
+
+	// Validate GCP configuration
+	if c.GCSBucketName == "" {
+		errors = append(errors, "GCS_BUCKET_NAME is required")
+	}
+
+	// Validate database configuration
+	if c.DBHost == "" {
+		errors = append(errors, "DB_HOST is required")
+	}
+	if c.DBPort == "" {
+		errors = append(errors, "DB_PORT is required")
+	}
+	if _, err := strconv.Atoi(c.DBPort); err != nil {
+		errors = append(errors, "DB_PORT must be a valid number")
+	}
+	if c.DBName == "" {
+		errors = append(errors, "DB_NAME is required")
+	}
+	if c.DBUser == "" {
+		errors = append(errors, "DB_USER is required")
+	}
+	if c.DBPassword == "" {
+		errors = append(errors, "DB_PASSWORD is required")
+	}
+
+	// Validate SSL mode
+	validSSLModes := []string{"disable", "require", "verify-ca", "verify-full"}
+	if !contains(validSSLModes, c.DBSSLMode) {
+		errors = append(errors, "DB_SSL_MODE must be one of: disable, require, verify-ca, verify-full")
+	}
+
+	// Validate connection limits
+	if c.DBMaxOpenConns <= 0 {
+		errors = append(errors, "DB_MAX_OPEN_CONNS must be greater than 0")
+	}
+	if c.DBMaxIdleConns <= 0 {
+		errors = append(errors, "DB_MAX_IDLE_CONNS must be greater than 0")
+	}
+	if c.DBMaxIdleConns > c.DBMaxOpenConns {
+		errors = append(errors, "DB_MAX_IDLE_CONNS cannot be greater than DB_MAX_OPEN_CONNS")
+	}
+
+	if len(errors) > 0 {
+		return fmt.Errorf("configuration validation failed: %s", strings.Join(errors, "; "))
+	}
+
 	return nil
+}
+
+// contains checks if a slice contains a string
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
 
 // getEnvWithDefault gets environment variable with default value

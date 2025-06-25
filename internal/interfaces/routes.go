@@ -5,7 +5,7 @@ import (
 )
 
 // SetupRoutes sets up all routes for the application
-func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *ContestHandler, bookmarkHandler *BookmarkHandler) {
+func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *ContestHandler, bookmarkHandler *BookmarkHandler, hackathonHandler *HackathonHandler) {
 	// API v1 routes
 	v1 := r.Group("/api/v1")
 	{
@@ -36,6 +36,21 @@ func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *Contes
 			bookmarks.POST("", bookmarkHandler.CreateBookmark)   // Create bookmark
 			bookmarks.GET("", bookmarkHandler.ListBookmarks)     // List bookmarks
 			bookmarks.DELETE("/:id", bookmarkHandler.DeleteBookmark) // Delete bookmark
+		}
+
+		// Hackathon routes
+		hackathons := v1.Group("/hackathons")
+		{
+			hackathons.POST("", hackathonHandler.CreateHackathon)   // Create hackathon
+			hackathons.GET("", hackathonHandler.ListHackathons)     // List hackathons
+			hackathons.GET("/:id", hackathonHandler.GetHackathon)   // Get hackathon by ID
+			hackathons.PUT("/:id", hackathonHandler.UpdateHackathon) // Update hackathon
+			hackathons.DELETE("/:id", hackathonHandler.DeleteHackathon) // Delete hackathon
+			
+			// Participant routes
+			hackathons.POST("/:id/participants", hackathonHandler.CreateParticipant)   // Register for hackathon
+			hackathons.GET("/:id/participants", hackathonHandler.ListParticipants)     // List participants
+			hackathons.DELETE("/:id/participants/:participant_id", hackathonHandler.DeleteParticipant) // Remove participant
 		}
 	}
 }

@@ -82,6 +82,9 @@ func main() {
 	// Create bookmark handler
 	bookmarkHandler := interfaces.NewBookmarkHandler(database.GetDB())
 
+	// Create hackathon handler
+	hackathonHandler := interfaces.NewHackathonHandler(database.GetDB())
+
 	// Set Gin mode from configuration
 	gin.SetMode(cfg.GinMode)
 
@@ -118,7 +121,7 @@ func main() {
 	})
 
 	// Setup API routes
-	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler)
+	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler, hackathonHandler)
 
 	// Create HTTP server with port from configuration
 	srv := &http.Server{
@@ -141,10 +144,10 @@ func main() {
 	log.Println("Shutting down server...")
 
 	// Give a timeout of 30 seconds to shutdown gracefully
-	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer shutdownCancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
 
