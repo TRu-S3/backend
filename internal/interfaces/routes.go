@@ -5,7 +5,7 @@ import (
 )
 
 // SetupRoutes sets up all routes for the application
-func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *ContestHandler) {
+func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *ContestHandler, bookmarkHandler *BookmarkHandler) {
 	// API v1 routes
 	v1 := r.Group("/api/v1")
 	{
@@ -28,6 +28,14 @@ func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *Contes
 			contests.GET("/:id", contestHandler.GetContest)   // Get contest by ID
 			contests.PUT("/:id", contestHandler.UpdateContest) // Update contest
 			contests.DELETE("/:id", contestHandler.DeleteContest) // Delete contest
+		}
+
+		// Bookmark routes
+		bookmarks := v1.Group("/bookmarks")
+		{
+			bookmarks.POST("", bookmarkHandler.CreateBookmark)   // Create bookmark
+			bookmarks.GET("", bookmarkHandler.ListBookmarks)     // List bookmarks
+			bookmarks.DELETE("/:id", bookmarkHandler.DeleteBookmark) // Delete bookmark
 		}
 	}
 }
