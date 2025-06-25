@@ -95,3 +95,5 @@ scripts/db/
 
 # Coverage reports
 coverage.html
+
+scripts/check_tables.go
