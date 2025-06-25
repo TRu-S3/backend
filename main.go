@@ -79,6 +79,9 @@ func main() {
 	// Create contest handler
 	contestHandler := interfaces.NewContestHandler(database.GetDB())
 
+	// Create bookmark handler
+	bookmarkHandler := interfaces.NewBookmarkHandler(database.GetDB())
+
 	// Set Gin mode from configuration
 	gin.SetMode(cfg.GinMode)
 
@@ -115,7 +118,7 @@ func main() {
 	})
 
 	// Setup API routes
-	interfaces.SetupRoutes(r, fileHandler, contestHandler)
+	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler)
 
 	// Create HTTP server with port from configuration
 	srv := &http.Server{
