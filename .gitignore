@@ -6,6 +6,7 @@
 *.dylib
 backend
 tru-s3
+main
 cloud-sql-proxy*
 
 # Test binary, built with `go test -c`
