@@ -76,11 +76,26 @@ func main() {
 	// Create handler
 	fileHandler := interfaces.NewFileHandler(fileService)
 
+	// Create user handler
+	userHandler := interfaces.NewUserHandler(database.GetDB())
+
+	// Create tag handler
+	tagHandler := interfaces.NewTagHandler(database.GetDB())
+
+	// Create profile handler
+	profileHandler := interfaces.NewProfileHandler(database.GetDB())
+
+	// Create matching handler
+	matchingHandler := interfaces.NewMatchingHandler(database.GetDB())
+
 	// Create contest handler
 	contestHandler := interfaces.NewContestHandler(database.GetDB())
 
 	// Create bookmark handler
 	bookmarkHandler := interfaces.NewBookmarkHandler(database.GetDB())
+
+	// Create hackathon handler
+	hackathonHandler := interfaces.NewHackathonHandler(database.GetDB())
 
 	// Set Gin mode from configuration
 	gin.SetMode(cfg.GinMode)
@@ -118,7 +133,7 @@ func main() {
 	})
 
 	// Setup API routes
-	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler)
+	interfaces.SetupRoutes(r, fileHandler, contestHandler, bookmarkHandler, hackathonHandler, userHandler, tagHandler, profileHandler, matchingHandler)
 
 	// Create HTTP server with port from configuration
 	srv := &http.Server{
@@ -141,10 +156,10 @@ func main() {
 	log.Println("Shutting down server...")
 
 	// Give a timeout of 30 seconds to shutdown gracefully
-	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer shutdownCancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
 

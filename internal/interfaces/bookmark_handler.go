@@ -83,6 +83,78 @@ func (h *BookmarkHandler) ListBookmarks(c *gin.Context) {
 	})
 }
 
+type UpdateBookmarkRequest struct {
+	UserID           *uint `json:"user_id,omitempty"`
+	BookmarkedUserID *uint `json:"bookmarked_user_id,omitempty"`
+}
+
+// UpdateBookmark handles PUT /api/v1/bookmarks/:id
+func (h *BookmarkHandler) UpdateBookmark(c *gin.Context) {
+	id := c.Param("id")
+	var bookmark database.Bookmark
+	var req UpdateBookmarkRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Find existing bookmark
+	if err := h.db.First(&bookmark, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Bookmark not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bookmark"})
+		}
+		return
+	}
+
+	// Update fields if provided
+	if req.UserID != nil {
+		// Check if user exists
+		var user database.User
+		if err := h.db.First(&user, *req.UserID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate user"})
+			return
+		}
+		bookmark.UserID = *req.UserID
+	}
+
+	if req.BookmarkedUserID != nil {
+		// Check if bookmarked user exists
+		var bookmarkedUser database.User
+		if err := h.db.First(&bookmarkedUser, *req.BookmarkedUserID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Bookmarked user not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate bookmarked user"})
+			return
+		}
+		bookmark.BookmarkedUserID = *req.BookmarkedUserID
+	}
+
+	// Validate that user is not bookmarking themselves
+	if bookmark.UserID == bookmark.BookmarkedUserID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot bookmark yourself"})
+		return
+	}
+
+	if err := h.db.Save(&bookmark).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bookmark"})
+		return
+	}
+
+	// Load relationships for response
+	h.db.Preload("User").Preload("BookmarkedUser").First(&bookmark, bookmark.ID)
+
+	c.JSON(http.StatusOK, bookmark)
+}
+
 func (h *BookmarkHandler) DeleteBookmark(c *gin.Context) {
 	id := c.Param("id")
 	var bookmark database.Bookmark

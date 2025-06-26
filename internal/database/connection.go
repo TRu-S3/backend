@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -107,19 +106,3 @@ func GetDB() *gorm.DB {
 	return DB
 }
 
-// maskPassword masks the password in DSN for logging
-func maskPassword(dsn string) string {
-	// For Cloud SQL Proxy Unix socket connections, don't mask (no password in path)
-	if strings.Contains(dsn, "/cloudsql/") {
-		return dsn
-	}
-
-	// For regular connections, mask the password
-	parts := strings.Split(dsn, " ")
-	for i, part := range parts {
-		if strings.HasPrefix(part, "password=") {
-			parts[i] = "password=***"
-		}
-	}
-	return strings.Join(parts, " ")
-}
