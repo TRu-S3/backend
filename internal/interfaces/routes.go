@@ -17,7 +17,7 @@ func SetupRoutes(r *gin.Engine, fileHandler *FileHandler, contestHandler *Contes
 			users.GET("/:id", userHandler.GetUser)                    // Get user by ID
 			users.PUT("/:id", userHandler.UpdateUser)                 // Update user
 			users.DELETE("/:id", userHandler.DeleteUser)              // Delete user
-			users.GET("/:user_id/matches", matchingHandler.GetUserMatches) // Get user matches
+			users.GET("/:id/matches", matchingHandler.GetUserMatches) // Get user matches
 		}
 
 		// Tag routes

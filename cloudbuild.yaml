@@ -21,31 +21,23 @@ steps:
   # Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
-      'run', 'deploy', 'tru-s3-backend',
+      'run', 'deploy', 'backend',
       '--image', 'gcr.io/$PROJECT_ID/tru-s3-backend:$BUILD_ID',
       '--region', 'asia-northeast1',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--add-cloudsql-instances', '$_CLOUD_SQL_CONNECTION_NAME',
-      '--set-env-vars',
-      'GIN_MODE=release,USE_CLOUD_SQL_PROXY=true,CLOUD_SQL_CONNECTION_NAME=$_CLOUD_SQL_CONNECTION_NAME,DB_NAME=$_DB_NAME,DB_USER=$_DB_USER,GCS_BUCKET_NAME=$_GCS_BUCKET_NAME,GCS_FOLDER=$_GCS_FOLDER,GOOGLE_CLOUD_PROJECT=$PROJECT_ID',
-      '--set-secrets',
-      'DB_PASSWORD=$_DB_PASSWORD_SECRET:latest',
       '--cpu', '1',
       '--memory', '512Mi',
       '--timeout', '300',
       '--concurrency', '80',
-      '--max-instances', '10'
+      '--max-instances', '10',
+      '--set-env-vars', 'GIN_MODE=release,USE_CLOUD_SQL_PROXY=true,CLOUD_SQL_CONNECTION_NAME=zenn-ai-agent-hackathon-460205:asia-northeast1:prd-db,DB_NAME=tru_s3,DB_USER=postgres,DB_SSL_MODE=require,GCS_BUCKET_NAME=202506-zenn-ai-agent-hackathon,GCS_FOLDER=test,GOOGLE_CLOUD_PROJECT=$PROJECT_ID',
+      '--set-secrets', 'DB_PASSWORD=db-password:latest',
+      '--add-cloudsql-instances', 'zenn-ai-agent-hackathon-460205:asia-northeast1:prd-db'
     ]
 
 # Build-time substitutions
-substitutions:
-  _CLOUD_SQL_CONNECTION_NAME: 'zenn-ai-agent-hackathon-460205:asia-northeast1:prd-db'
-  _DB_NAME: 'tru_s3'
-  _DB_USER: 'postgres'
-  _DB_PASSWORD_SECRET: 'tru-s3-db-password'  # Secret Manager secret name
-  _GCS_BUCKET_NAME: '202506-zenn-ai-agent-hackathon'
-  _GCS_FOLDER: 'test'
+substitutions: {}
 
 # Build options
 options:

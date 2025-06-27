@@ -29,7 +29,7 @@ func Connect(cfg *config.Config) error {
 	// Configure GORM logger
 	gormLogger := logger.Default
 	if cfg.IsDevelopment() {
-		gormLogger = logger.Default.LogMode(logger.Info)
+		gormLogger = logger.Default.LogMode(logger.Warn)
 	} else {
 		gormLogger = logger.Default.LogMode(logger.Error)
 	}
