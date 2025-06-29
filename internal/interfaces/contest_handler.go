@@ -26,6 +26,8 @@ type CreateContestRequest struct {
 	Purpose             string `json:"purpose" binding:"required"`
 	Message             string `json:"message" binding:"required"`
 	AuthorID            uint   `json:"author_id" binding:"required"`
+	Title               string `json:"title,omitempty"`
+	Description         string `json:"description,omitempty"`
 }
 
 type UpdateContestRequest struct {
@@ -62,6 +64,8 @@ func (h *ContestHandler) CreateContest(c *gin.Context) {
 		Purpose:             req.Purpose,
 		Message:             req.Message,
 		AuthorID:            req.AuthorID,
+		Title:               req.Title,
+		Description:         req.Description,
 	}
 
 	if err := h.db.Create(&contest).Error; err != nil {
