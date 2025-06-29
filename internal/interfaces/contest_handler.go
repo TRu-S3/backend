@@ -35,6 +35,8 @@ type UpdateContestRequest struct {
 	ApplicationDeadline *string `json:"application_deadline,omitempty"`
 	Purpose             *string `json:"purpose,omitempty"`
 	Message             *string `json:"message,omitempty"`
+	Title               *string `json:"title,omitempty"`
+	Description         *string `json:"description,omitempty"`
 }
 
 // CreateContest handles POST /api/v1/contests
@@ -178,6 +180,12 @@ func (h *ContestHandler) UpdateContest(c *gin.Context) {
 	}
 	if req.Message != nil {
 		contest.Message = *req.Message
+	}
+	if req.Title != nil {
+		contest.Title = *req.Title
+	}
+	if req.Description != nil {
+		contest.Description = *req.Description
 	}
 
 	if err := h.db.Save(&contest).Error; err != nil {
